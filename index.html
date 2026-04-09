@@ -697,12 +697,10 @@ The leader you are speaking with is: ${a.name}. Their tagline: "${a.tagline}". T
 Coach from this archetype. Be direct, personal, and grounded in faith. Speak like a trusted advisor — not a therapist. 2-4 sentences per response. No bullet points. No fluff. No profanity or crude language of any kind.`;
 
   try {
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
+    const res = await fetch('/api/chat', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 1000,
         system: systemPrompt,
         messages: chatHistory
       })
