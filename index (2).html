@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Watts Leadership — Leadership Identity Assessment</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --orange: #E84A1E;
+    --orange-dim: rgba(232,74,30,0.15);
+    --orange-glow: rgba(232,74,30,0.35);
+    --gold: #CDA84C;
+    --black: #0A0A0A;
+    --dark: #111111;
+    --card: #181818;
+    --border: rgba(255,255,255,0.08);
+    --text: #F0EDE8;
+    --muted: rgba(240,237,232,0.55);
+    --font-display: 'Playfair Display', Georgia, serif;
+    --font-body: 'DM Sans', system-ui, sans-serif;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--black);
+    color: var(--text);
+    font-family: var(--font-body);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── Noise overlay ── */
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    background-size: 200px;
+    pointer-events: none; z-index: 1000; opacity: 0.5;
+  }
+
+  /* ── Ember glow ── */
+  .ember {
+    position: fixed; border-radius: 50%; pointer-events: none; z-index: 0;
+    filter: blur(80px); opacity: 0.12;
+  }
+  .ember-1 { width: 500px; height: 500px; background: var(--orange); top: -200px; right: -100px; }
+  .ember-2 { width: 300px; height: 300px; background: var(--gold); bottom: -100px; left: -50px; }
+
+  /* ── Screen system ── */
+  .screen { display: none; min-height: 100vh; position: relative; z-index: 1; }
+  .screen.active { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 2rem 1.25rem; }
+  .screen.top { justify-content: flex-start; padding-top: 2.5rem; }
+
+  /* ── Welcome screen ── */
+  #screen-welcome .logo-mark {
+    width: 72px; height: 72px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--orange), #B33616);
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--font-display); font-size: 2rem; font-weight: 900;
+    color: #fff; letter-spacing: -1px; margin: 0 auto 1.5rem;
+    box-shadow: 0 0 40px var(--orange-glow), 0 4px 24px rgba(0,0,0,0.4);
+    position: relative;
+  }
+  #screen-welcome .logo-mark::after {
+    content: '';
+    position: absolute; inset: -3px; border-radius: 50%;
+    border: 1px solid rgba(232,74,30,0.4);
+  }
+
+  #screen-welcome .eyebrow {
+    text-align: center; font-size: 0.7rem; font-weight: 600;
+    letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold);
+    margin-bottom: 0.5rem;
+  }
+
+  #screen-welcome h1 {
+    font-family: var(--font-display);
+    font-size: clamp(2rem, 7vw, 3rem);
+    font-weight: 900; text-align: center; line-height: 1.1;
+    margin-bottom: 1rem; color: var(--text);
+  }
+
+  #screen-welcome h1 em {
+    font-style: normal; color: var(--orange);
+  }
+
+  .coach-card {
+    display: flex; align-items: center; gap: 1rem;
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 16px; padding: 1rem 1.25rem;
+    margin: 1.5rem 0; max-width: 420px; width: 100%;
+  }
+  .coach-photo {
+    width: 56px; height: 56px; border-radius: 50%; flex-shrink: 0;
+    background: linear-gradient(135deg, #2a2a2a, #1a1a1a);
+    border: 2px solid var(--orange); overflow: hidden;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.4rem;
+  }
+  .coach-photo img { width: 100%; height: 100%; object-fit: cover; }
+  .coach-info { flex: 1; }
+  .coach-name {
+    font-family: var(--font-display); font-weight: 700; font-size: 1rem;
+    color: var(--text); margin-bottom: 0.15rem;
+  }
+  .coach-title { font-size: 0.75rem; color: var(--muted); line-height: 1.4; }
+
+  .welcome-body {
+    font-size: 0.9rem; color: var(--muted); text-align: center;
+    line-height: 1.65; max-width: 360px; margin-bottom: 2rem;
+  }
+
+  /* ── Buttons ── */
+  .btn-primary {
+    background: var(--orange);
+    color: #fff; font-family: var(--font-body);
+    font-weight: 600; font-size: 0.9rem;
+    letter-spacing: 0.05em; text-transform: uppercase;
+    padding: 0.9rem 2.5rem; border-radius: 100px;
+    border: none; cursor: pointer; width: 100%; max-width: 320px;
+    box-shadow: 0 4px 24px var(--orange-glow);
+    transition: transform 0.15s, box-shadow 0.15s;
+  }
+  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 32px var(--orange-glow); }
+  .btn-primary:active { transform: translateY(0); }
+
+  .btn-secondary {
+    background: transparent; color: var(--text);
+    font-family: var(--font-body); font-weight: 500; font-size: 0.85rem;
+    padding: 0.75rem 2rem; border-radius: 100px;
+    border: 1px solid var(--border); cursor: pointer; width: 100%; max-width: 320px;
+    transition: border-color 0.2s, background 0.2s; margin-top: 0.75rem;
+  }
+  .btn-secondary:hover { border-color: var(--orange); background: var(--orange-dim); }
+
+  .disclaimer {
+    font-size: 0.7rem; color: rgba(240,237,232,0.3);
+    text-align: center; max-width: 300px; margin-top: 1.5rem;
+    line-height: 1.5;
+  }
+
+  /* ── Progress bar ── */
+  .progress-wrap {
+    width: 100%; max-width: 420px; margin-bottom: 2rem;
+  }
+  .progress-label {
+    display: flex; justify-content: space-between;
+    font-size: 0.7rem; color: var(--muted); margin-bottom: 0.5rem;
+    font-weight: 500; letter-spacing: 0.05em; text-transform: uppercase;
+  }
+  .progress-track {
+    height: 3px; background: rgba(255,255,255,0.08); border-radius: 2px; overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%; background: linear-gradient(90deg, var(--orange), var(--gold));
+    border-radius: 2px; transition: width 0.5s ease;
+  }
+
+  /* ── Question screen ── */
+  #screen-question { padding: 2rem 1.25rem; }
+
+  .q-eyebrow {
+    font-size: 0.68rem; font-weight: 600; letter-spacing: 0.18em;
+    text-transform: uppercase; color: var(--orange); margin-bottom: 1rem; text-align: center;
+  }
+
+  .q-text {
+    font-family: var(--font-display); font-size: clamp(1.2rem, 4vw, 1.6rem);
+    font-weight: 700; text-align: center; line-height: 1.35;
+    color: var(--text); max-width: 380px; margin: 0 auto 2rem;
+  }
+
+  .options { width: 100%; max-width: 420px; display: flex; flex-direction: column; gap: 0.75rem; }
+
+  .option {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 14px; padding: 1rem 1.25rem;
+    cursor: pointer; transition: all 0.2s;
+    text-align: left; width: 100%; font-family: var(--font-body);
+    display: flex; align-items: flex-start; gap: 0.75rem;
+  }
+  .option:hover {
+    border-color: var(--orange); background: var(--orange-dim);
+    transform: translateX(3px);
+  }
+  .option .opt-letter {
+    width: 24px; height: 24px; border-radius: 6px; flex-shrink: 0;
+    background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.7rem; font-weight: 700; color: var(--muted);
+    margin-top: 1px;
+  }
+  .option:hover .opt-letter { background: var(--orange); border-color: var(--orange); color: #fff; }
+  .option .opt-text { font-size: 0.9rem; color: var(--text); line-height: 1.45; }
+
+  /* ── Loading ── */
+  #screen-loading .loading-ring {
+    width: 64px; height: 64px; border-radius: 50%;
+    border: 3px solid rgba(255,255,255,0.06);
+    border-top-color: var(--orange);
+    animation: spin 0.8s linear infinite; margin-bottom: 1.5rem;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  #screen-loading .loading-text {
+    font-family: var(--font-display); font-size: 1.1rem; color: var(--muted);
+    font-style: italic; text-align: center;
+  }
+
+  /* ── Result card ── */
+  #screen-result { padding: 2rem 1.25rem; }
+
+  .result-badge {
+    display: inline-flex; align-items: center; gap: 0.4rem;
+    background: var(--orange-dim); border: 1px solid rgba(232,74,30,0.3);
+    border-radius: 100px; padding: 0.35rem 0.9rem;
+    font-size: 0.7rem; font-weight: 600; letter-spacing: 0.15em;
+    text-transform: uppercase; color: var(--orange); margin-bottom: 1rem;
+  }
+
+  .archetype-name {
+    font-family: var(--font-display); font-size: clamp(2.2rem, 8vw, 3.2rem);
+    font-weight: 900; color: var(--text); line-height: 1;
+    margin-bottom: 0.5rem; text-align: center;
+  }
+  .archetype-name span { color: var(--orange); }
+
+  .archetype-tagline {
+    font-size: 1rem; color: var(--gold); font-style: italic;
+    text-align: center; font-family: var(--font-display);
+    margin-bottom: 1.5rem;
+  }
+
+  .result-divider {
+    width: 40px; height: 2px;
+    background: linear-gradient(90deg, var(--orange), var(--gold));
+    border-radius: 1px; margin: 0 auto 1.5rem;
+  }
+
+  .strength-card, .growth-card {
+    width: 100%; max-width: 420px; border-radius: 16px; padding: 1.25rem;
+    margin-bottom: 0.75rem;
+  }
+  .strength-card {
+    background: var(--card); border: 1px solid rgba(232,74,30,0.2);
+  }
+  .growth-card {
+    background: var(--card); border: 1px solid rgba(205,168,76,0.2);
+  }
+  .card-label {
+    font-size: 0.65rem; font-weight: 700; letter-spacing: 0.2em;
+    text-transform: uppercase; margin-bottom: 0.4rem;
+  }
+  .strength-card .card-label { color: var(--orange); }
+  .growth-card .card-label { color: var(--gold); }
+  .card-text { font-size: 0.88rem; color: var(--muted); line-height: 1.55; }
+
+  .scripture {
+    font-family: var(--font-display); font-style: italic;
+    font-size: 0.85rem; color: rgba(240,237,232,0.4);
+    text-align: center; max-width: 360px; line-height: 1.6;
+    margin: 1.25rem 0; padding: 1rem;
+    border-left: 2px solid var(--orange);
+    text-align: left;
+  }
+
+  /* ── Mirror chat ── */
+  #screen-chat { padding: 0; }
+  .chat-header {
+    position: sticky; top: 0; z-index: 10;
+    background: rgba(10,10,10,0.92); backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    padding: 1rem 1.25rem; display: flex; align-items: center; gap: 0.75rem;
+    width: 100%;
+  }
+  .mirror-avatar {
+    width: 40px; height: 40px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--orange), #B33616);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.1rem; flex-shrink: 0;
+  }
+  .mirror-info { flex: 1; }
+  .mirror-name { font-weight: 600; font-size: 0.9rem; }
+  .mirror-sub { font-size: 0.72rem; color: var(--muted); }
+  .mirror-dot { width: 7px; height: 7px; border-radius: 50%; background: #4ADE80; flex-shrink: 0; }
+
+  .chat-messages {
+    flex: 1; overflow-y: auto; padding: 1.25rem;
+    display: flex; flex-direction: column; gap: 1rem;
+    width: 100%; max-width: 600px; margin: 0 auto;
+  }
+
+  #screen-chat {
+    display: none; flex-direction: column; min-height: 100vh;
+  }
+  #screen-chat.active { display: flex; }
+
+  .msg {
+    max-width: 85%; padding: 0.9rem 1.1rem;
+    border-radius: 18px; font-size: 0.88rem; line-height: 1.6;
+    animation: fadeUp 0.3s ease;
+  }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; } }
+  .msg-ai {
+    background: var(--card); border: 1px solid var(--border);
+    border-bottom-left-radius: 4px; align-self: flex-start;
+    color: var(--text);
+  }
+  .msg-user {
+    background: var(--orange); color: #fff;
+    border-bottom-right-radius: 4px; align-self: flex-end;
+  }
+
+  .typing-indicator {
+    display: flex; gap: 4px; align-items: center;
+    padding: 0.9rem 1.1rem; background: var(--card);
+    border: 1px solid var(--border); border-radius: 18px;
+    border-bottom-left-radius: 4px; align-self: flex-start;
+  }
+  .typing-dot {
+    width: 6px; height: 6px; border-radius: 50%; background: var(--muted);
+    animation: bounce 1.2s infinite;
+  }
+  .typing-dot:nth-child(2) { animation-delay: 0.15s; }
+  .typing-dot:nth-child(3) { animation-delay: 0.3s; }
+  @keyframes bounce { 0%,60%,100%{transform:translateY(0)} 30%{transform:translateY(-5px)} }
+
+  .chat-input-wrap {
+    position: sticky; bottom: 0;
+    background: rgba(10,10,10,0.92); backdrop-filter: blur(12px);
+    border-top: 1px solid var(--border); padding: 0.9rem 1.25rem;
+    display: flex; gap: 0.6rem; width: 100%;
+  }
+  .chat-input {
+    flex: 1; background: var(--card); border: 1px solid var(--border);
+    border-radius: 24px; padding: 0.7rem 1.1rem;
+    color: var(--text); font-family: var(--font-body); font-size: 0.88rem;
+    outline: none; resize: none;
+    transition: border-color 0.2s;
+  }
+  .chat-input:focus { border-color: rgba(232,74,30,0.4); }
+  .chat-input::placeholder { color: var(--muted); }
+  .send-btn {
+    width: 40px; height: 40px; border-radius: 50%; flex-shrink: 0;
+    background: var(--orange); border: none; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    align-self: flex-end; transition: transform 0.15s;
+  }
+  .send-btn:hover { transform: scale(1.08); }
+  .send-btn svg { width: 16px; height: 16px; fill: #fff; }
+
+  /* ── Sessions banner ── */
+  .sessions-banner {
+    font-size: 0.72rem; color: var(--muted); text-align: center;
+    padding: 0.5rem; background: rgba(232,74,30,0.06);
+    border-top: 1px solid rgba(232,74,30,0.1);
+  }
+
+  /* ── Util ── */
+  .w-full { width: 100%; }
+  .max-w { max-width: 420px; }
+  .center { text-align: center; }
+  .spacer { height: 1rem; }
+  .logo-brand {
+    font-family: var(--font-display); font-weight: 900; font-size: 0.85rem;
+    letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted);
+    text-align: center; margin-top: 2rem;
+  }
+  .logo-brand span { color: var(--orange); }
+</style>
+</head>
+<body>
+
+<div class="ember ember-1"></div>
+<div class="ember ember-2"></div>
+
+<!-- ── WELCOME ── -->
+<div id="screen-welcome" class="screen active">
+  <div class="logo-mark">W</div>
+  <p class="eyebrow">Watts Leadership LLC</p>
+  <h1>Discover Your<br/><em>Leadership Identity</em></h1>
+
+  <div class="coach-card">
+    <div class="coach-photo">
+      <!-- SWAP: Replace the emoji below with: <img src="YOUR_HEADSHOT_URL" alt="Eric Watts"/> -->
+      🔥
+    </div>
+    <div class="coach-info">
+      <div class="coach-name">Eric J. Watts, Sr.</div>
+      <div class="coach-title">Leadership Coach · MBA · 25+ Years<br/>Corporate roots. Kingdom assignment.</div>
+    </div>
+  </div>
+
+  <p class="welcome-body">
+    Every leader has been shaped by fire. This assessment reveals the leader you've become — your strengths, your blind spots, and what it looks like when you lead at your best.
+  </p>
+
+  <button class="btn-primary" onclick="startAssessment()">BEGIN ASSESSMENT</button>
+  <p class="disclaimer">For personal development purposes only. Not professional coaching, counseling, or therapeutic advice.</p>
+  <p class="logo-brand">Powered by <span>Watts Leadership</span></p>
+</div>
+
+<!-- ── QUESTIONS ── -->
+<div id="screen-question" class="screen top">
+  <div style="width:100%;max-width:420px;">
+    <div class="progress-wrap">
+      <div class="progress-label">
+        <span id="q-count">Question 1 of 5</span>
+        <span id="q-pct">0%</span>
+      </div>
+      <div class="progress-track"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+    </div>
+  </div>
+  <p class="q-eyebrow" id="q-eyebrow">FORGING YOUR PROFILE</p>
+  <p class="q-text" id="q-text"></p>
+  <div class="options" id="options-wrap"></div>
+</div>
+
+<!-- ── LOADING ── -->
+<div id="screen-loading" class="screen">
+  <div class="loading-ring"></div>
+  <p class="loading-text" id="loading-text">Forging your identity…</p>
+</div>
+
+<!-- ── RESULT ── -->
+<div id="screen-result" class="screen top">
+  <div style="width:100%;max-width:420px;display:flex;flex-direction:column;align-items:center;">
+    <div class="result-badge">🔥 Your Archetype</div>
+    <div class="archetype-name" id="arch-name"></div>
+    <div class="archetype-tagline" id="arch-tagline"></div>
+    <div class="result-divider"></div>
+    <div class="strength-card w-full">
+      <div class="card-label">Your Strength</div>
+      <div class="card-text" id="arch-strength"></div>
+    </div>
+    <div class="growth-card w-full">
+      <div class="card-label">Growth Edge</div>
+      <div class="card-text" id="arch-growth"></div>
+    </div>
+    <div class="scripture w-full" id="arch-scripture"></div>
+    <button class="btn-primary" onclick="goToMirror()" style="margin-top:0.5rem">TALK WITH THE MIRROR →</button>
+    <button class="btn-secondary" onclick="restart()">Retake Assessment</button>
+    <p class="logo-brand" style="margin-top:1.5rem;">Watts Leadership LLC</p>
+  </div>
+</div>
+
+<!-- ── MIRROR CHAT ── -->
+<div id="screen-chat" class="screen">
+  <div class="chat-header">
+    <div class="mirror-avatar">🪞</div>
+    <div class="mirror-info">
+      <div class="mirror-name">The Mirror</div>
+      <div class="mirror-sub">Watts Leadership AI Coach</div>
+    </div>
+    <div class="mirror-dot"></div>
+  </div>
+  <div class="chat-messages" id="chat-messages"></div>
+  <div class="sessions-banner" id="sessions-banner">3 sessions remaining — <a href="#" style="color:var(--orange);text-decoration:none;">Unlock unlimited →</a></div>
+  <div class="chat-input-wrap">
+    <textarea class="chat-input" id="chat-input" rows="1" placeholder="Ask The Mirror…" onkeydown="handleKey(event)"></textarea>
+    <button class="send-btn" onclick="sendMessage()">
+      <svg viewBox="0 0 24 24"><path d="M2 21l21-9L2 3v7l15 2-15 2v7z"/></svg>
+    </button>
+  </div>
+</div>
+
+<script>
+// ── Data ──────────────────────────────────────────────────────────────────
+const ARCHETYPES = {
+  steward: {
+    name: "The Steward",
+    tagline: "Faithful with what you've been given",
+    strength: "You lead with integrity and accountability. People trust you not because you demand it, but because you've earned it — consistently, quietly, over time. You build systems that outlast you.",
+    growth: "You can mistake control for stewardship. Delegation feels like risk. Your edge: learning to empower others as generously as you manage resources.",
+    scripture: '"Well done, good and faithful servant." — Matthew 25:21'
+  },
+  torch: {
+    name: "The Torch",
+    tagline: "You light the path others are afraid to walk",
+    strength: "Visionary energy. You see what isn't yet real and have the courage to say it out loud. People follow your fire even when they can't fully see where you're going.",
+    growth: "Vision without execution leaves people inspired but stranded. Your edge: building the bridge between what you see and what your team can do right now.",
+    scripture: '"Where there is no vision, the people perish." — Proverbs 29:18'
+  },
+  shepherd: {
+    name: "The Shepherd",
+    tagline: "No one gets left behind on your watch",
+    strength: "Relational intelligence at its finest. You know your people — their fears, their capacity, their ceiling. You develop leaders others give up on.",
+    growth: "Protecting people can become preventing their growth. Your edge: knowing when love means letting them struggle instead of stepping in.",
+    scripture: '"The good shepherd lays down his life for the sheep." — John 10:11'
+  },
+  watchman: {
+    name: "The Watchman",
+    tagline: "You see what others miss — and sound the alarm",
+    strength: "Strategic clarity and discernment. You don't react — you read. While others respond to what's happening, you're already thinking three steps ahead.",
+    growth: "Warning without relationship creates distance. Your edge: learning to deliver hard truths in a way that draws people in rather than shutting them down.",
+    scripture: '"Son of man, I have made you a watchman for the people of Israel." — Ezekiel 33:7'
+  }
+};
+
+const QUESTIONS = [
+  {
+    text: "When a crisis hits your team, your first instinct is to…",
+    eyebrow: "FORGING YOUR PROFILE",
+    options: [
+      { text: "Assess the damage and stabilize the system immediately", value: "steward" },
+      { text: "Cast a vision for what's possible on the other side of this", value: "torch" },
+      { text: "Check on your people — make sure no one is cracking under pressure", value: "shepherd" },
+      { text: "Get quiet, analyze the pattern, and figure out what this is really about", value: "watchman" }
+    ]
+  },
+  {
+    text: "Your team comes to you with a decision they can't agree on. You…",
+    eyebrow: "YOUR DECISION STYLE",
+    options: [
+      { text: "Lay out the data, set a clear process, and drive to a conclusion", value: "steward" },
+      { text: "Reconnect them to the mission — the answer usually follows clarity", value: "torch" },
+      { text: "Give everyone a voice before anything gets decided", value: "shepherd" },
+      { text: "Ask the question no one else is asking — you suspect there's a root issue", value: "watchman" }
+    ]
+  },
+  {
+    text: "What do people most often thank you for?",
+    eyebrow: "YOUR IMPACT",
+    options: [
+      { text: "Being reliable and delivering — they always know what they're getting with you", value: "steward" },
+      { text: "Helping them believe something was possible when they couldn't see it", value: "torch" },
+      { text: "Actually listening — making them feel genuinely known and cared for", value: "shepherd" },
+      { text: "Seeing something coming that saved them from a costly mistake", value: "watchman" }
+    ]
+  },
+  {
+    text: "If a star player on your team is underperforming, your first move is…",
+    eyebrow: "HOW YOU DEVELOP PEOPLE",
+    options: [
+      { text: "Review expectations, metrics, and accountability — get clarity on what's missing", value: "steward" },
+      { text: "Remind them of who they are and what they're capable of — they need a spark", value: "torch" },
+      { text: "Have a real conversation — something's going on underneath the surface", value: "shepherd" },
+      { text: "Observe before you engage — you want to understand the full picture first", value: "watchman" }
+    ]
+  },
+  {
+    text: "At your best, leadership feels like…",
+    eyebrow: "YOUR LEADERSHIP IDENTITY",
+    options: [
+      { text: "Building something that will outlast you and carry the mission forward", value: "steward" },
+      { text: "Calling people into a future they couldn't imagine for themselves", value: "torch" },
+      { text: "Watching someone become who they were always meant to be", value: "shepherd" },
+      { text: "Protecting what matters most while others are distracted by the noise", value: "watchman" }
+    ]
+  }
+];
+
+// ── State ─────────────────────────────────────────────────────────────────
+let currentQ = 0;
+const scores = { steward:0, torch:0, shepherd:0, watchman:0 };
+let archetype = null;
+let chatHistory = [];
+let sessionCount = 3;
+
+// ── Navigation ────────────────────────────────────────────────────────────
+function show(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-' + id).classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+function startAssessment() {
+  currentQ = 0;
+  Object.keys(scores).forEach(k => scores[k] = 0);
+  showQuestion();
+  show('question');
+}
+
+function showQuestion() {
+  const q = QUESTIONS[currentQ];
+  const pct = Math.round((currentQ / QUESTIONS.length) * 100);
+
+  document.getElementById('q-count').textContent = `Question ${currentQ + 1} of ${QUESTIONS.length}`;
+  document.getElementById('q-pct').textContent = `${pct}%`;
+  document.getElementById('progress-fill').style.width = `${pct}%`;
+  document.getElementById('q-eyebrow').textContent = q.eyebrow;
+  document.getElementById('q-text').textContent = q.text;
+
+  const wrap = document.getElementById('options-wrap');
+  wrap.innerHTML = '';
+  const letters = ['A','B','C','D'];
+  q.options.forEach((opt, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'option';
+    btn.innerHTML = `<span class="opt-letter">${letters[i]}</span><span class="opt-text">${opt.text}</span>`;
+    btn.onclick = () => answer(opt.value);
+    wrap.appendChild(btn);
+  });
+}
+
+function answer(value) {
+  scores[value]++;
+  currentQ++;
+  if (currentQ < QUESTIONS.length) {
+    showQuestion();
+  } else {
+    calcResult();
+  }
+}
+
+function calcResult() {
+  show('loading');
+  const loadingTexts = ["Forging your identity…", "Reading the fire…", "Your profile is taking shape…"];
+  let li = 0;
+  const interval = setInterval(() => {
+    li = (li + 1) % loadingTexts.length;
+    document.getElementById('loading-text').textContent = loadingTexts[li];
+  }, 900);
+
+  setTimeout(() => {
+    clearInterval(interval);
+    archetype = Object.entries(scores).sort((a,b) => b[1]-a[1])[0][0];
+    const a = ARCHETYPES[archetype];
+    document.getElementById('arch-name').innerHTML = `The <span>${a.name.replace('The ','')}</span>`;
+    document.getElementById('arch-tagline').textContent = a.tagline;
+    document.getElementById('arch-strength').textContent = a.strength;
+    document.getElementById('arch-growth').textContent = a.growth;
+    document.getElementById('arch-scripture').textContent = a.scripture;
+    show('result');
+  }, 2200);
+}
+
+function goToMirror() {
+  chatHistory = [];
+  document.getElementById('chat-messages').innerHTML = '';
+  show('chat');
+  const a = ARCHETYPES[archetype];
+  addMessage(`I see you, ${a.name}.\n\n${a.tagline}.\n\nYou've been shaped by fire — and this assessment has revealed something true about who you are as a leader. I'm The Mirror. I don't just reflect who you are. I reflect who you're becoming.\n\nWhat's weighing on you as a leader right now?`, 'ai');
+  updateSessionBanner();
+}
+
+function restart() { show('welcome'); }
+
+// ── Chat ──────────────────────────────────────────────────────────────────
+function addMessage(text, role) {
+  const wrap = document.getElementById('chat-messages');
+  const div = document.createElement('div');
+  div.className = `msg msg-${role}`;
+  div.textContent = text;
+  wrap.appendChild(div);
+  wrap.scrollTop = wrap.scrollHeight;
+}
+
+function showTyping() {
+  const wrap = document.getElementById('chat-messages');
+  const div = document.createElement('div');
+  div.className = 'typing-indicator'; div.id = 'typing';
+  div.innerHTML = '<div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div>';
+  wrap.appendChild(div);
+  wrap.scrollTop = wrap.scrollHeight;
+}
+
+function removeTyping() {
+  const t = document.getElementById('typing');
+  if (t) t.remove();
+}
+
+function updateSessionBanner() {
+  document.getElementById('sessions-banner').innerHTML =
+    `${sessionCount} session${sessionCount !== 1 ? 's' : ''} remaining — <a href="#" style="color:var(--orange);text-decoration:none;">Unlock unlimited →</a>`;
+}
+
+function handleKey(e) {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+}
+
+async function sendMessage() {
+  const input = document.getElementById('chat-input');
+  const text = input.value.trim();
+  if (!text) return;
+
+  if (sessionCount <= 0) {
+    addMessage("You've used all your free sessions. Unlock unlimited access to keep going.", 'ai');
+    return;
+  }
+
+  input.value = '';
+  addMessage(text, 'user');
+  chatHistory.push({ role: 'user', content: text });
+  sessionCount--;
+  updateSessionBanner();
+
+  showTyping();
+
+  const a = ARCHETYPES[archetype];
+  const systemPrompt = `You are The Mirror — an AI leadership coach inside the Watts Leadership platform, created by Eric J. Watts Sr. Your role is to reflect truth back to leaders with precision, warmth, and scripture-grounded insight.
+
+The leader you are speaking with is: ${a.name}. Their tagline: "${a.tagline}". Their strength: "${a.strength}". Their growth edge: "${a.growth}". Their anchor scripture: "${a.scripture}".
+
+Coach from this archetype. Be direct, personal, and grounded in faith. Speak like a trusted advisor — not a therapist. 2-4 sentences per response. No bullet points. No fluff. No profanity or crude language of any kind.`;
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        system: systemPrompt,
+        messages: chatHistory
+      })
+    });
+    const data = await res.json();
+    removeTyping();
+    const reply = data.content?.[0]?.text || "I'm here. Keep going.";
+    addMessage(reply, 'ai');
+    chatHistory.push({ role: 'assistant', content: reply });
+  } catch(e) {
+    removeTyping();
+    addMessage("Lost the signal for a moment. Take a breath — try again.", 'ai');
+  }
+}
+</script>
+</body>
+</html>
