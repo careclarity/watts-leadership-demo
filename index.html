@@ -384,8 +384,7 @@
 
   <div class="coach-card">
     <div class="coach-photo">
-      <!-- SWAP: Replace the emoji below with: <img src="YOUR_HEADSHOT_URL" alt="Eric Watts"/> -->
-      🔥
+      <img src="https://d1yei2z3i6k35z.cloudfront.net/655223/66c36aede2801_FB_IMG_1710597556147.jpg" alt="Eric J. Watts, Sr."/>
     </div>
     <div class="coach-info">
       <div class="coach-name">Eric J. Watts, Sr.</div>
@@ -457,7 +456,7 @@
     <div class="mirror-dot"></div>
   </div>
   <div class="chat-messages" id="chat-messages"></div>
-  <div class="sessions-banner" id="sessions-banner">3 sessions remaining — <a href="#" style="color:var(--orange);text-decoration:none;">Unlock unlimited →</a></div>
+  <div class="sessions-banner" id="sessions-banner">5 sessions remaining — <a href="https://calendly.com/ericjwatts/forged-strategy-session" target="_blank" style="color:var(--orange);text-decoration:none;">Book a Strategy Session →</a></div>
   <div class="chat-input-wrap">
     <textarea class="chat-input" id="chat-input" rows="1" placeholder="Ask The Mirror…" onkeydown="handleKey(event)"></textarea>
     <button class="send-btn" onclick="sendMessage()">
@@ -557,7 +556,7 @@ let currentQ = 0;
 const scores = { steward:0, torch:0, shepherd:0, watchman:0 };
 let archetype = null;
 let chatHistory = [];
-let sessionCount = 3;
+let sessionCount = 5;
 
 // ── Navigation ────────────────────────────────────────────────────────────
 function show(id) {
@@ -663,8 +662,11 @@ function removeTyping() {
 }
 
 function updateSessionBanner() {
-  document.getElementById('sessions-banner').innerHTML =
-    `${sessionCount} session${sessionCount !== 1 ? 's' : ''} remaining — <a href="#" style="color:var(--orange);text-decoration:none;">Unlock unlimited →</a>`;
+  const link = `<a href="https://calendly.com/ericjwatts/forged-strategy-session" target="_blank" style="color:var(--orange);text-decoration:none;">Book a Strategy Session →</a>`;
+  const msg = sessionCount > 0
+    ? `${sessionCount} session${sessionCount !== 1 ? 's' : ''} remaining — ${link}`
+    : `Sessions used — ready to go deeper? ${link}`;
+  document.getElementById('sessions-banner').innerHTML = msg;
 }
 
 function handleKey(e) {
@@ -694,7 +696,7 @@ async function sendMessage() {
 
 The leader you are speaking with is: ${a.name}. Their tagline: "${a.tagline}". Their strength: "${a.strength}". Their growth edge: "${a.growth}". Their anchor scripture: "${a.scripture}".
 
-Coach from this archetype. Be direct, personal, and grounded in faith. Speak like a trusted advisor — not a therapist. 2-4 sentences per response. No bullet points. No fluff. No profanity or crude language of any kind.`;
+Coach from this archetype. Be direct, personal, and grounded in faith. Speak like a trusted advisor — not a therapist. 2-3 sentences maximum. No bullet points. No fluff. No profanity or crude language of any kind.`;
 
   try {
     const res = await fetch('/api/chat', {
