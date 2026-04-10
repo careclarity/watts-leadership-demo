@@ -384,7 +384,7 @@
 
   <div class="coach-card">
     <div class="coach-photo">
-      <img src="https://d1yei2z3i6k35z.cloudfront.net/655223/66c36aede2801_FB_IMG_1710597556147.jpg" alt="Eric J. Watts, Sr."/>
+      <img src="https://raw.githubusercontent.com/careclarity/watts-leadership-demo/main/Eric%20Watts151938%20(1).jpg" alt="Eric J. Watts, Sr."/>
     </div>
     <div class="coach-info">
       <div class="coach-name">Eric J. Watts, Sr.</div>
@@ -456,7 +456,7 @@
     <div class="mirror-dot"></div>
   </div>
   <div class="chat-messages" id="chat-messages"></div>
-  <div class="sessions-banner" id="sessions-banner">5 sessions remaining — <a href="https://calendly.com/ericjwatts/forged-strategy-session" target="_blank" style="color:var(--orange);text-decoration:none;">Book a Strategy Session →</a></div>
+  <div class="sessions-banner" id="sessions-banner">5 sessions remaining — <a href="https://calendly.com/ericjwatts/forged-strategy-session" target="_blank" rel="noopener" style="color:var(--orange);text-decoration:none;">Book a Strategy Session →</a></div>
   <div class="chat-input-wrap">
     <textarea class="chat-input" id="chat-input" rows="1" placeholder="Ask The Mirror…" onkeydown="handleKey(event)"></textarea>
     <button class="send-btn" onclick="sendMessage()">
@@ -637,19 +637,43 @@ function calcResult() {
 function goToMirror() {
   chatHistory = [];
   document.getElementById('chat-messages').innerHTML = '';
+  const input = document.getElementById('chat-input');
+  const sendBtn = document.querySelector('.send-btn');
+  input.disabled = false;
+  sendBtn.disabled = false;
+  input.placeholder = 'Ask The Mirror…';
   show('chat');
   updateSessionBanner();
   if (sessionCount <= 0) {
-    addMessage("You've used all your free sessions. Ready to go deeper? Book a strategy session with Eric to keep the work going.", 'ai');
-    document.getElementById('chat-input').disabled = true;
-    document.querySelector('.send-btn').disabled = true;
+    showGate();
     return;
   }
   const a = ARCHETYPES[archetype];
-  addMessage(`I see you, ${a.name}.\n\n${a.tagline}.\n\nYou\'ve been shaped by fire — and this assessment has revealed something true about who you are as a leader. I\'m The Mirror. I don\'t just reflect who you are. I reflect who you\'re becoming.\n\nWhat\'s weighing on you as a leader right now?`, 'ai');
+  addMessage(`I see you, ${a.name}.
+
+${a.tagline}.
+
+You've been in the fire. This assessment revealed something real about who you are as a leader. I'm The Mirror. I don't just reflect who you are right now. I reflect who you're becoming. What's weighing on you most as a leader right now?`, 'ai');
 }
 
 function restart() { show('welcome'); }
+
+function showGate() {
+  const wrap = document.getElementById('chat-messages');
+  wrap.innerHTML = '';
+  const div = document.createElement('div');
+  div.style.cssText = 'display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2rem 1rem;gap:1rem;text-align:center;';
+  div.innerHTML = `
+    <div style="font-size:2rem;">🔥</div>
+    <div style="font-family:var(--font-display);font-size:1.4rem;font-weight:700;color:var(--text);line-height:1.3;">You went deep.<br/>Now go further.</div>
+    <div style="font-size:0.88rem;color:var(--muted);max-width:300px;line-height:1.6;">You used your free sessions. The Mirror showed you something real — don't let it stop here. Book a strategy call with Eric and keep the work going.</div>
+    <a href="https://calendly.com/ericjwatts/forged-strategy-session" target="_blank" style="background:var(--orange);color:#fff;font-family:var(--font-body);font-weight:600;font-size:0.88rem;letter-spacing:0.05em;text-transform:uppercase;padding:0.85rem 2rem;border-radius:100px;text-decoration:none;box-shadow:0 4px 24px var(--orange-glow);display:inline-block;margin-top:0.5rem;">BOOK A STRATEGY SESSION →</a>
+    <button onclick="restart()" style="background:transparent;border:none;color:var(--muted);font-size:0.8rem;cursor:pointer;margin-top:0.25rem;">Start over</button>
+  `;
+  wrap.appendChild(div);
+  document.getElementById('chat-input').disabled = true;
+  document.querySelector('.send-btn').disabled = true;
+}
 
 // ── Chat ──────────────────────────────────────────────────────────────────
 function addMessage(text, role) {
@@ -676,7 +700,7 @@ function removeTyping() {
 }
 
 function updateSessionBanner() {
-  const link = `<a href="https://calendly.com/ericjwatts/forged-strategy-session" target="_blank" style="color:var(--orange);text-decoration:none;">Book a Strategy Session →</a>`;
+  const link = `<a href="https://calendly.com/ericjwatts/forged-strategy-session" target="_blank" rel="noopener" style="color:var(--orange);text-decoration:none;">Book a Strategy Session →</a>`;
   const msg = sessionCount > 0
     ? `${sessionCount} session${sessionCount !== 1 ? 's' : ''} remaining — ${link}`
     : `Sessions used — ready to go deeper? ${link}`;
@@ -693,16 +717,17 @@ async function sendMessage() {
   if (!text) return;
 
   // Secret reset for testing
-  if (text.toLowerCase() === 'jesusizking') {
+  if (text.trim().toLowerCase() === 'jesusizking') {
     localStorage.removeItem(SESSION_KEY);
     sessionCount = MAX_SESSIONS;
     input.value = '';
     input.disabled = false;
     document.querySelector('.send-btn').disabled = false;
+    input.placeholder = 'Ask The Mirror…';
     updateSessionBanner();
     document.getElementById('chat-messages').innerHTML = '';
     const a = ARCHETYPES[archetype];
-    addMessage(`Sessions reset. I see you, ${a.name}. What\'s weighing on you as a leader right now?`, 'ai');
+    addMessage("Sessions reset. Back in it. What's weighing on you as a leader right now?", 'ai');
     return;
   }
 
@@ -725,7 +750,7 @@ async function sendMessage() {
 
 The leader you are speaking with is: ${a.name}. Their tagline: "${a.tagline}". Their strength: "${a.strength}". Their growth edge: "${a.growth}". Their anchor scripture: "${a.scripture}".
 
-Coach from this archetype. Be direct, personal, and grounded in faith. Speak like a trusted advisor — not a therapist. 2-3 sentences maximum. No bullet points. No fluff. No profanity or crude language of any kind.`;
+You talk like a real person who has been in the room — not a coach reading from a manual. No motivational poster language. No "I hear you." No "That's a great question." No em dashes. Contractions are fine. Short sentences hit harder than long ones. Ask one sharp question when you sense they need to go deeper — don't just validate what they said. If they're wrong about something, say so with respect. Your goal is not to make them feel good. Your goal is to help them see something they couldn't see before. 2-3 sentences max. No bullet points. No profanity.`;
 
   try {
     const res = await fetch('/api/chat', {
