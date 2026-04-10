@@ -703,7 +703,7 @@ function updateSessionBanner() {
   const link = `<a href="https://calendly.com/ericjwatts/forged-strategy-session" target="_blank" rel="noopener" style="color:var(--orange);text-decoration:none;">Book a Strategy Session →</a>`;
   const msg = sessionCount > 0
     ? `${sessionCount} session${sessionCount !== 1 ? 's' : ''} remaining — ${link}`
-    : `Sessions used — ready to go deeper? ${link}`;
+    : `<a href="https://calendly.com/ericjwatts/forged-strategy-session" target="_blank" rel="noopener" style="background:var(--orange);color:#fff;padding:0.4rem 1rem;border-radius:100px;text-decoration:none;font-weight:600;font-size:0.75rem;letter-spacing:0.05em;text-transform:uppercase;">BOOK A STRATEGY SESSION →</a>`;
   document.getElementById('sessions-banner').innerHTML = msg;
 }
 
@@ -732,7 +732,7 @@ async function sendMessage() {
   }
 
   if (sessionCount <= 0) {
-    addMessage("You\'ve used all your free sessions. Ready to go deeper? Book a strategy session with Eric.", 'ai');
+    showGate();
     return;
   }
 
