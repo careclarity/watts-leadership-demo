@@ -556,7 +556,15 @@ let currentQ = 0;
 const scores = { steward:0, torch:0, shepherd:0, watchman:0 };
 let archetype = null;
 let chatHistory = [];
-let sessionCount = 5;
+// ── Session persistence via localStorage ─────────────────────────────────
+const SESSION_KEY = 'wl_sessions';
+const MAX_SESSIONS = 5;
+function getSessions() {
+  const s = localStorage.getItem(SESSION_KEY);
+  return s !== null ? parseInt(s) : MAX_SESSIONS;
+}
+function saveSessions(n) { localStorage.setItem(SESSION_KEY, n); }
+let sessionCount = getSessions();
 
 // ── Navigation ────────────────────────────────────────────────────────────
 function show(id) {
@@ -630,9 +638,15 @@ function goToMirror() {
   chatHistory = [];
   document.getElementById('chat-messages').innerHTML = '';
   show('chat');
-  const a = ARCHETYPES[archetype];
-  addMessage(`I see you, ${a.name}.\n\n${a.tagline}.\n\nYou've been shaped by fire — and this assessment has revealed something true about who you are as a leader. I'm The Mirror. I don't just reflect who you are. I reflect who you're becoming.\n\nWhat's weighing on you as a leader right now?`, 'ai');
   updateSessionBanner();
+  if (sessionCount <= 0) {
+    addMessage("You've used all your free sessions. Ready to go deeper? Book a strategy session with Eric to keep the work going.", 'ai');
+    document.getElementById('chat-input').disabled = true;
+    document.querySelector('.send-btn').disabled = true;
+    return;
+  }
+  const a = ARCHETYPES[archetype];
+  addMessage(`I see you, ${a.name}.\n\n${a.tagline}.\n\nYou\'ve been shaped by fire — and this assessment has revealed something true about who you are as a leader. I\'m The Mirror. I don\'t just reflect who you are. I reflect who you\'re becoming.\n\nWhat\'s weighing on you as a leader right now?`, 'ai');
 }
 
 function restart() { show('welcome'); }
@@ -678,8 +692,22 @@ async function sendMessage() {
   const text = input.value.trim();
   if (!text) return;
 
+  // Secret reset for testing
+  if (text.toLowerCase() === 'jesusizking') {
+    localStorage.removeItem(SESSION_KEY);
+    sessionCount = MAX_SESSIONS;
+    input.value = '';
+    input.disabled = false;
+    document.querySelector('.send-btn').disabled = false;
+    updateSessionBanner();
+    document.getElementById('chat-messages').innerHTML = '';
+    const a = ARCHETYPES[archetype];
+    addMessage(`Sessions reset. I see you, ${a.name}. What\'s weighing on you as a leader right now?`, 'ai');
+    return;
+  }
+
   if (sessionCount <= 0) {
-    addMessage("You've used all your free sessions. Unlock unlimited access to keep going.", 'ai');
+    addMessage("You\'ve used all your free sessions. Ready to go deeper? Book a strategy session with Eric.", 'ai');
     return;
   }
 
@@ -687,6 +715,7 @@ async function sendMessage() {
   addMessage(text, 'user');
   chatHistory.push({ role: 'user', content: text });
   sessionCount--;
+  saveSessions(sessionCount);
   updateSessionBanner();
 
   showTyping();
